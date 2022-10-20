@@ -1,0 +1,7 @@
+---
+
+- name: Setup "kubectl" for OS Family
+  ansible.builtin.include_tasks:
+    file: 'setup-kubectl-{{ ansible_os_family | lower }}.yml'
+    apply:
+      become: true

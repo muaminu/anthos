@@ -1,0 +1,32 @@
+#--------------------------------------------------------------------
+# Playbook to Create Anthos Cluster
+#--------------------------------------------------------------------
+
+---
+
+- name: Prepare the Anthos Cluster Nodes
+  hosts: "{{ target_nodes }}"
+  remote_user: "{{ login_user }}"
+  become: true
+  vars_files:
+    - vars/anthos.yml
+    - vars/timesync.yml
+  roles:
+    - role: remove-docker
+    - role: system-package-update
+    - role: disable-firewall
+    - role: setup-timesync
+    # - role: setup-login-user
+    # - role: copy-workstation-ssh
+
+- name: Setup the Anthos Cluster
+  hosts: "{{ target_workstation }}"
+  remote_user: "{{ login_user }}"
+  vars_files:
+    - vars/anthos.yml
+  roles:
+    - role: copy-service-account-files
+    - role: check-cluster-registered
+    - role: bmctl-create-config
+    - role: bmctl-check-config
+    - role: bmctl-create-cluster

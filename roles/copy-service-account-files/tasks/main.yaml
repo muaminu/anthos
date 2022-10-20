@@ -1,0 +1,48 @@
+---
+- name: copy gcr SA to Workstation 
+  ansible.builtin.copy:   
+    src: /home/anthos-clusters/hp-gcr.json
+    dest: /home/
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: u=rw,g=rw,o=rw
+
+- name: copy register SA to Workstation
+  ansible.builtin.copy: 
+    src: /home/anthos-clusters/hp-register.json
+    dest: /home/
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: u=rw,g=rw,o=rw
+
+- name: copy cloudops SA to Workstation
+  ansible.builtin.copy: 
+    src: /home/anthos-clusters/hp-cloudops.json
+    dest: /home/
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: u=rw,g=rw,o=rw
+
+- name: copy connect SA to Workstation
+  ansible.builtin.copy:
+    src: /home/anthos-clusters/hp-connect.json
+    dest: /home/
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: u=rw,g=rw,o=rw
+    
+- name: Copy Ansible Service Account Key
+  ansible.builtin.copy:
+    src: /home/anthos-clusters/ansible-runner.json
+    dest: /home/ansibleuser/
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: u=rw,g=rw,o=rw
+
+
+# - name: give user permmision to SSH key
+#   ansible.builtin.file:
+#     path: /root/.ssh/id_rsa
+#     owner: "{{ login_user }}"
+#     group: "{{ login_user }}"
+#     mode: u=rw,g=rw,o=rw

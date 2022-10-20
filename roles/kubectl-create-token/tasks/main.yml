@@ -1,0 +1,81 @@
+---
+- name: set secrets name as enviroment variables
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      export KUBECONFIG=/{{bmctl_workspace_dir}}/{{ cluster_name }}/{{ cluster_name }}-kubeconfig
+  args:
+    executable: /bin/bash
+
+- name: set secrets name as enviroment variables
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      KSA_NAME={{KSA_NAME}}
+      SECRET_NAME={{SECRET_NAME}}
+      VIEW_BINDING={{VIEW_BINDING}}
+      CLOUD_CONSOLE_READER_BINDING_NAME={{CLOUD_CONSOLE_READER_BINDING_NAME}}
+  args:
+    executable: /bin/bash
+
+
+# - name: kubectl generate cluster-role rbac policy
+#   kubernetes.core.k8s:
+#     state: present
+#     src: /{{bmctl_workspace_dir}}/cloud-console-reader.yml
+
+- name: set secrets name as enviroment variables
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      kubectl apply -f {{bmctl_workspace_dir}}/cloud-console-reader.yml --kubeconfig /{{bmctl_workspace_dir}}/{{ cluster_name }}/{{ cluster_name }}-kubeconfig
+  args:
+    executable: /bin/bash
+
+
+- name: create auth ksa view cloud-console-reader 
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      kubectl create serviceaccount {{KSA_NAME}} --kubeconfig /{{bmctl_workspace_dir}}/{{ cluster_name }}/{{ cluster_name }}-kubeconfig
+      kubectl create clusterrolebinding {{VIEW_BINDING}} --clusterrole view --serviceaccount default:{{ KSA_NAME }} --kubeconfig /{{bmctl_workspace_dir}}/{{ cluster_name }}/{{ cluster_name }}-kubeconfig
+      kubectl create clusterrolebinding {{CLOUD_CONSOLE_READER_BINDING_NAME}} --clusterrole cloud-console-reader --serviceaccount default:{{ KSA_NAME }} --kubeconfig /{{bmctl_workspace_dir}}/{{ cluster_name }}/{{ cluster_name }}-kubeconfig
+  args:
+    executable: /bin/bash
+
+
+# - name: Get KSA Bearer Token
+#   kubernetes.core.k8s:
+#     state: present
+#     src: /{{bmctl_workspace_dir}}/secret_ksa-token.yml
+
+- name: apply secret.yml file
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      kubectl apply -f {{bmctl_workspace_dir}}/secret_ksa-token.yml --kubeconfig /{{bmctl_workspace_dir}}/{{ cluster_name }}/{{ cluster_name }}-kubeconfig
+  args:
+    executable: /bin/bash
+
+- name: Get Token 
+  ansible.builtin.shell:
+    cmd: |
+      kubectl get secret {{SECRET_NAME}} --kubeconfig /{{bmctl_workspace_dir}}/{{ cluster_name }}/{{ cluster_name }}-kubeconfig
+      kubectl get secret {{SECRET_NAME}} -o jsonpath={$.data.token} --kubeconfig /{{bmctl_workspace_dir}}/{{ cluster_name }}/{{ cluster_name }}-kubeconfig > /{{bmctl_workspace_dir}}/secret_encoded
+      base64 -d /{{bmctl_workspace_dir}}/secret_encoded > /{{bmctl_workspace_dir}}/secret_decoded   
+  args:
+    executable: /bin/bash
+
+- name: Read a token file content
+  shell: |
+    cat /{{bmctl_workspace_dir}}/secret_decoded
+  register: token_content
+
+- name: Print the token file content to a console
+  debug:
+    msg: "{{ token_content.stdout }}"
+
+
+# - name: Get running status
+#   raw: kubectl apply -f cloud-console-reader.yml
+

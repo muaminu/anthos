@@ -1,0 +1,47 @@
+
+#--------------------------------------------------------------------
+# Playbook to Create Anthos Workstation
+#--------------------------------------------------------------------
+
+---
+
+- name: Prepare the Anthos Workstation
+  hosts: "{{ target_workstation }}"
+  remote_user: "{{ login_user }}"
+  become: true
+  vars_files:
+    - vars/anthos.yml
+    - vars/timesync.yml
+  roles:
+    - role: system-package-update
+    - role: disable-firewall
+    - role: setup-timesync
+    # - role: setup-login-user
+
+
+- name: set-up gcloud kubectl bmctl docker"
+  hosts: "{{ target_workstation }}"
+  remote_user: "{{ login_user }}"
+  become: true
+  vars_files:
+    - vars/anthos.yml
+  roles:
+    # - role: copy-service-account-keys
+    - role: setup-gcloud-sdk
+    - role: activate-gcloud-sdk
+    - role: setup-kubectl
+    - role: setup-bmctl
+    - role: setup-docker
+
+
+- name: Setup the Anthos Cluster
+  hosts: "{{ target_workstation }}"
+  remote_user: "{{ login_user }}"
+  vars_files:
+    - vars/anthos.yml
+  roles:
+    - role: copy-service-account-files
+    - role: check-cluster-registered
+    - role: bmctl-create-config
+    - role: bmctl-check-config
+    - role: bmctl-create-cluster

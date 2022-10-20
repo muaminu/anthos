@@ -1,0 +1,77 @@
+
+export KUBECONFIG=bmctl-workspace/test-anthos-edge-ansible/test-anthos-edge-ansible-kubeconfig
+
+cat <<EOF > cloud-console-reader.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cloud-console-reader
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "persistentvolumes", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "list", "watch"]
+EOF
+kubectl apply -f cloud-console-reader.yaml
+
+# Setting up a service account
+KSA_NAME=test-sa
+kubectl create serviceaccount ${KSA_NAME}
+kubectl create clusterrolebinding test-ksa \
+   --clusterrole view --serviceaccount default:${KSA_NAME}
+kubectl create clusterrolebinding test-ccr \
+   --clusterrole cloud-console-reader --serviceaccount default:${KSA_NAME}
+# if you want to deploy a Kubernetes application from Cloud Marketplace, bind the cluster-admin role to the KSA:
+# kubectl create clusterrolebinding test-ca \
+#    --clusterrole cluster-admin --serviceaccount default:test-sa
+  #  Replace BINDING_NAME with the name of the cluster role binding for the service account
+
+#Bind the view and cloud-console-reader ClusterRoles:
+
+
+ACCOUNT_NAME=test-an
+kubectl create clusterrolebinding test-kksa \
+   --clusterrole view --serviceaccount default:${ACCOUNT_NAME}
+kubectl create clusterrolebinding test-ccr \
+   --clusterrole cloud-console-reader --serviceaccount default:${ACCOUNT_NAME}
+
+#bind the cluster-admin role, run the following command:
+kubectl create clusterrolebinding test-ca \
+   --clusterrole cluster-admin --serviceaccount default:test-ksa
+
+
+# To acquire the KSA's bearer token, run the following command:
+
+SECRET_NAME=test-sa-token
+
+kubectl apply -f - << __EOF__
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "${SECRET_NAME}"
+  annotations:
+    kubernetes.io/service-account.name: "${KSA_NAME}"
+type: kubernetes.io/service-account-token
+__EOF__
+
+until [[ $(kubectl get -o=jsonpath="{.data.token}" "secret/${SECRET_NAME}") ]]; do
+  echo "waiting for token..." >&2;
+  sleep 1;
+done
+
+kubectl get secret ${SECRET_NAME} -o jsonpath='{$.data.token}' | base64 --decode
+
+
+
+# note: https://cloud.google.com/anthos/identity/setup/bearer-token-auth
+
+
+gcloud container clusters delete test-anthos-edge-ansible --region us-central1-a
+
+./bmctl reset --cluster dell-cluster --kubeconfig /root/baremetal/bmctl-workspace/dell-cluster/dell-cluster-kubeconfig 
+
+
+
+kubectl get secret ksa-name-token-xbr7l -o jsonpath='{$.data.token}' | base64 --decode

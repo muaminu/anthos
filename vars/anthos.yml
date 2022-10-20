@@ -1,0 +1,55 @@
+
+#--------------------------------------------------------------------
+# Target Hosts
+#--------------------------------------------------------------------
+target_workstation: target_workstation
+target_nodes: anthos_cluster
+
+#--------------------------------------------------------------------
+# Google Cloud Project Configuration
+#--------------------------------------------------------------------
+gcp_project_id: "us-gcp-ame-con-sjsxu-npd-1"
+
+ansible_service_account: "ansible-runner"
+
+anthos_container_registry_service_account: "anthos-container-registry"
+anthos_connect_agent_service_account: "anthos-connect-agent"
+anthos_connect_register_service_account: "anthos-connect-register"
+anthos_logging_monitoring_service_account: "anthos-logging-monitoring"
+
+secret_manager_locations: "us-central1"
+
+#--------------------------------------------------------------------
+# "bmctl" Configuration
+#--------------------------------------------------------------------
+bmctl_version: "1.12.1"
+
+login_user: "ansibleuser"
+
+# gcp_keys_dir: "{{ ansible_user_dir }}/.gcp_keys"
+gcp_keys_dir: "{{ ansible_user_dir }}"
+bmctl_workspace_dir: "{{ ansible_user_dir }}/bmctl-workspace"
+
+# Cluster name: The name the Anthos Cluster will be registered with on GCP
+# Cluster type. This can be:
+#   1) admin:      to create an admin cluster. This can later be used to create user clusters.
+#   2) user:       to create a user cluster. Requires an existing admin cluster.
+#   3) hybrid:     to create a hybrid cluster that runs admin cluster components and user workloads.
+#   4) standalone: to create a cluster that manages itself, runs user workloads, but does not manage other clusters.
+# Cluster profile. This can be:
+#   1) default: The default profile has limited resource requirements.
+#   2) edge:    The edge profile minimizes the resource consumption of Anthos clusters on bare metal. It is only available for standalone clusters.
+cluster_name: "test-anthos-edge"
+cluster_type: "standalone"
+cluster_profile: "edge"
+cluster_location: "us-central1-a"
+
+# Container Runtime specifies which container runtime to use for scheduling containers on nodes.
+# containerd and docker are supported.
+container_runtime: "containerd"
+
+#RBAC Variables
+KSA_NAME : "ksa-name"
+SECRET_NAME: "secret-name"
+VIEW_BINDING: "view-name"
+CLOUD_CONSOLE_READER_BINDING_NAME: " ccrb-name"

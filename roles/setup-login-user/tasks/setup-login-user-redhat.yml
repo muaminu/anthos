@@ -1,0 +1,12 @@
+---
+
+- name: Create the "login_user" account [RedHat / CentOS]
+  ansible.builtin.user:
+    name: "{{ login_user }}"
+    comment: "Anthos Login User"
+    shell: /bin/bash
+    groups: wheel
+    append: yes
+    generate_ssh_key: yes
+    ssh_key_file: ".ssh/id_rsa"
+    ssh_key_comment: "{{ login_user }}@{{ ansible_hostname }}"

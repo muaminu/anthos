@@ -1,0 +1,14 @@
+---
+- name: Retrieve Workstation SSH Public Key
+  ansible.builtin.slurp:
+    src: "/home/{{ login_user }}/.ssh/id_rsa.pub"
+  register: out
+  become: true
+  delegate_to: "{{ target_workstation }}"
+
+- name: Write to SSH Authorized Keys
+  authorized_key:
+    user="{{ login_user }}"
+    key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    manage_dir=yes
+  ignore_errors: true

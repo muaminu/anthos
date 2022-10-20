@@ -1,0 +1,10 @@
+---
+# This playbook deletes Anthos Clusters and the Files
+- name: delete anthos cluster
+  hosts: "{{ target_workstation }}"
+  remote_user: "{{ login_user }}"
+  vars_files:
+    - vars/anthos.yml
+  roles:
+  - role: copy-kubectl-files
+  - role: kubectl-create-token

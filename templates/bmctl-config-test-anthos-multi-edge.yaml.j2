@@ -1,0 +1,86 @@
+#jinja2: trim_blocks: "true", lstrip_blocks: "false"
+#gcrKeyPath: "{{ gcp_keys_dir }}/{{ anthos_container_registry_service_account }}.json"
+#sshPrivateKeyPath: "{{ ansible_user_dir }}/.ssh/id_rsa"
+#gkeConnectAgentServiceAccountKeyPath: "{{ gcp_keys_dir }}/{{ anthos_connect_agent_service_account }}.json"
+#gkeConnectRegisterServiceAccountKeyPath: "{{ gcp_keys_dir }}/{{ anthos_connect_register_service_account }}.json"
+#cloudOperationsServiceAccountKeyPath: "{{ gcp_keys_dir }}/{{ anthos_logging_monitoring_service_account }}.json"
+gcrKeyPath: /home/hp-gcr.json
+sshPrivateKeyPath: "{{ ansible_user_dir }}/.ssh/id_rsa"
+gkeConnectAgentServiceAccountKeyPath: /home/hp-connect.json
+gkeConnectRegisterServiceAccountKeyPath: /home/hp-register.json
+cloudOperationsServiceAccountKeyPath: /home/hp-cloudops.json
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cluster-{{ cluster_name }}
+---
+apiVersion: baremetal.cluster.gke.io/v1
+kind: Cluster
+metadata:
+  name: {{ cluster_name }}
+  namespace: cluster-{{ cluster_name }}
+spec:
+  type: {{ cluster_type }}
+  profile: {{ cluster_profile }}
+  anthosBareMetalVersion: {{ bmctl_version }}
+  gkeConnect:
+    projectID: {{ gcp_project_id }}
+  controlPlane:
+    nodePoolSpec:
+      nodes:
+      - address: 10.100.0.7
+      - address: 10.100.0.5
+      - address: 10.100.0.6
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 10.16.0.0/16
+    services:
+      cidrBlocks:
+      - 10.96.0.0/20
+  loadBalancer:
+    mode: bundled
+    ports:
+      controlPlaneLBPort: 443
+    vips:
+      controlPlaneVIP: 10.100.0.49
+      ingressVIP: 10.100.0.50
+    addressPools:
+    - name: ingressPool
+      addresses:
+      - 10.100.0.50-10.100.0.60
+  clusterOperations:
+    projectID: {{ gcp_project_id }}
+    location: {{ cluster_location }}
+    disableCloudAuditLogging: false
+  #  enableApplication: true
+  storage:
+    lvpNodeMounts:
+      path: /mnt/localpv-disk
+      storageClassName: local-disks
+    lvpShare:
+      path: /mnt/localpv-share
+      storageClassName: local-shared
+      numPVUnderSharedPath: 5
+  nodeConfig:
+    podDensity:
+      maxPodsPerNode: 110
+    containerRuntime: {{ container_runtime }}
+  # kubevirt:
+  #  useEmulation: false
+ # nodeAccess:
+ #   loginUser: {{ login_user }}
+
+#---
+#apiVersion: baremetal.cluster.gke.io/v1
+#kind: NodePool
+#metadata:
+ # name: node-pool-1
+  #namespace: cluster-{{ cluster_name }}
+#spec:
+#  clusterName: {{ cluster_name }}
+ # nodes:
+  #- address: 10.100.0.5
+  #- address: 10.100.0.6

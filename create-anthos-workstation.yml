@@ -1,0 +1,48 @@
+
+#--------------------------------------------------------------------
+# Playbook to Create Anthos Workstation
+#--------------------------------------------------------------------
+
+---
+
+# - name: Prepare the Google Cloud Project for Anthos
+#   hosts: localhost
+#   remote_user: ami
+#   # become: yes
+#   become: true
+#   vars_files:
+#     - vars/anthos.yml
+#   roles:
+#     # - role: enable-ansible-services
+#     # - role: enable-anthos-services
+#     # - role: create-anthos-service-accounts
+#     # - role: create-ansible-service-accounts
+
+
+- name: Prepare the Anthos Workstation
+  hosts: "{{ target_workstation }}"
+  remote_user: "{{ login_user }}"
+  become: true
+  vars_files:
+    - vars/anthos.yml
+    - vars/timesync.yml
+  roles:
+    - role: system-package-update
+    - role: disable-firewall
+    - role: setup-timesync
+    # - role: setup-login-user
+
+
+- name: Setup the Anthos Workstation as "login_user"
+  hosts: "{{ target_workstation }}"
+  remote_user: "{{ login_user }}"
+  become: true
+  vars_files:
+    - vars/anthos.yml
+  roles:
+    # - role: copy-service-account-keys
+    - role: setup-gcloud-sdk
+    - role: activate-gcloud-sdk
+    - role: setup-kubectl
+    - role: setup-bmctl
+    - role: setup-docker

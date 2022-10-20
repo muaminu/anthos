@@ -1,0 +1,14 @@
+
+---
+
+- name: Enable Google Cloud Services
+  google.cloud.gcp_serviceusage_service:
+    name: "{{ item }}"
+    project: "{{ gcp_project_id }}"
+    auth_kind: application
+    state: present
+  with_items:
+    - servicecontrol.googleapis.com
+    - servicemanagement.googleapis.com
+    - serviceusage.googleapis.com
+    - secretmanager.googleapis.com

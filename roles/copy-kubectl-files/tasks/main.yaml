@@ -1,0 +1,16 @@
+---
+- name: copy cloud-console-reader.yml to Workstation 
+  ansible.builtin.copy:   
+    src: /home/anthos-clusters/cloud-console-reader.yml
+    dest: /{{bmctl_workspace_dir}}/
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: u=rw,g=rw,o=rw
+
+- name: copy secret_ksa-token.yml to Workstation
+  ansible.builtin.copy: 
+    src: /home/anthos-clusters/secret_ksa-token.yml
+    dest: /{{bmctl_workspace_dir}}/
+    owner: "{{ login_user }}"
+    group: "{{ login_user }}"
+    mode: u=rw,g=rw,o=rw

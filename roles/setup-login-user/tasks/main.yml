@@ -1,0 +1,44 @@
+---
+
+- include_tasks: setup-login-user-redhat.yml
+  when: ansible_os_family == 'RedHat'
+- include_tasks: setup-login-user-debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Configure the "login_user" for Passwordless "sudo"
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: '/etc/sudoers.d/00-{{ login_user }}'
+    owner: root
+    group: root
+    mode: u=rw,g=r,o=r
+  become: true
+
+- name: Create "authorized_keys" for the "login_user
+  authorized_key:
+    user: "{{ login_user }}"
+    state: present
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+    
+# - name: Create "authorized_keys" for the "login_user"
+#   ansible.builtin.shell: 
+#     cmd: |
+#       set -o pipefail
+#       cp {{ ansible_user_dir }}/.ssh/authorized_keys {{ ansible_user_dir }}/../{{ login_user }}/.ssh/authorized_keys
+#       chown {{ login_user }}: {{ ansible_user_dir }}/../{{ login_user }}/.ssh/authorized_keys
+#       chmod 600 {{ ansible_user_dir }}/../{{ login_user }}/.ssh/authorized_keys
+#   args:
+#     executable: /bin/bash
+#   become: true
+#   changed_when: false
+
+# - name: Create "authorized_keys" for the "login_user"
+#   ansible.builtin.shell: |
+#     - command: set -o pipefail
+#     - command: cp {{ ansible_user_dir }}/.ssh/authorized_keys {{ ansible_user_dir }}/../{{ login_user }}/.ssh/authorized_keys
+#     - command: chown {{ login_user }}: {{ ansible_user_dir }}/../{{ login_user }}/.ssh/authorized_keys
+#     - command: chmod 600 {{ ansible_user_dir }}/../{{ login_user }}/.ssh/authorized_keys
+#   args:
+#     executable: /bin/bash
+#   become: true
+#   changed_when: false

@@ -1,0 +1,8 @@
+# enable_plugins = gcp_compute
+[all]
+
+  [target_workstation]
+  zbi-cp1 ansible_user=root 
+  zbi-cp2 ansible_user=root 
+  zbi-cp3 ansible_user=root  
+

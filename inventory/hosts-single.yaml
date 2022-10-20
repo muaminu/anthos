@@ -1,8 +1,0 @@
-# enable_plugins = gcp_compute
-[all]
-
-  [target_workstation]
-  test-controlplane ansible_user=root 
-  test-target-node-1 ansible_user=root 
-  test-target-node-2 ansible_user=root 
-

@@ -74,4 +74,4 @@ gcloud container clusters delete test-anthos-edge-ansible --region us-central1-a
 
 
 
-kubectl get secret ksa-name-token-xbr7l -o jsonpath='{$.data.token}' | base64 --decode
+kubectl get secret ksa-name-token-62qpf -o jsonpath='{$.data.token}' | base64 --decode
